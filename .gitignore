@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Environment variables and secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+
+# Build and Output directories (if using TypeScript or bundlers)
+dist/
+build/
+out/
+
+# IDEs and Editors
+.vscode/
+
+# Operating System files
+.DS_Store
