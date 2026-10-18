@@ -6,3 +6,5 @@ export type Note = {
     created_at: Date;
     updated_at: Date;
 }
+
+export type NoteRow = Note;
