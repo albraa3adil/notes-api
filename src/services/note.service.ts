@@ -1,6 +1,6 @@
 import { Note } from "../types/note";
 import { AppError } from "../errors/appError.ts"
-import { createNoteDb } from "../repositories/note.repository.ts";
+import { createNoteDb, getNotesDb } from "../repositories/note.repository.ts";
 
 function validateTitle(title: unknown): string {
     if (typeof title !== 'string' || !title.trim()) {
@@ -54,4 +54,8 @@ export async function createNote(title: unknown, content: unknown, tags: unknown
     const validTags = validateTags(tags);
 
     return createNoteDb(validTitle, validContent, validTags);
+};
+
+export async function getNotes(): Promise<Note[]> {
+    return await getNotesDb(); 
 }
