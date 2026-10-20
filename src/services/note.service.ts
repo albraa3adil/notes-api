@@ -1,6 +1,6 @@
 import { Note } from "../types/note";
 import { AppError } from "../errors/appError.ts"
-import { createNoteDb, getNotesDb, updateNoteDB } from "../repositories/note.repository.ts";
+import { createNoteDb, getNoteByIdDb, getNotesDb, updateNoteDB } from "../repositories/note.repository.ts";
 import { validate as isValidUUID } from 'uuid';
 
 function validateId(id: unknown): string {
@@ -82,4 +82,15 @@ export async function updateNote(id: unknown, title: unknown, content: unknown, 
     }
 
     return note;
-}
+};
+
+export async function getNoteById(id: unknown): Promise<Note | null> {
+  const validId = validateId(id);
+    const note = await getNoteByIdDb(validId); 
+
+    if (!note) {
+      throw new AppError(404, "Note not found.");
+    }
+
+    return note;
+};

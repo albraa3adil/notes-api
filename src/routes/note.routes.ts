@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createNote, getNotes, updateNote } from "../services/note.service";
+import { createNote, getNoteById, getNotes, updateNote } from "../services/note.service";
 
 export const noteRouter = Router();
 
@@ -38,6 +38,18 @@ noteRouter.put("/:id", async (req, res, next) => {
             success: true,
             data: { note }
         });  
+    } catch (error) {
+        next(error);
+    }
+});
+
+noteRouter.get("/:id", async (req, res, next) => {
+    try {
+        const note = await getNoteById(req.params.id);
+        res.status(200).json({
+            success: true,
+            data: { note }
+        })
     } catch (error) {
         next(error);
     }
