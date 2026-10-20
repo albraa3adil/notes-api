@@ -19,7 +19,7 @@ export async function getNotesDb(): Promise<Note[]> {
     `);
 
     return result.rows;
-}
+};
 
 export async function updateNoteDB(id: string, title: string, content: string, tags: string[]): Promise<Note | null> {
     const result = await pool.query<NoteRow>(`
@@ -31,3 +31,13 @@ export async function updateNoteDB(id: string, title: string, content: string, t
 
     return result.rows[0] ?? null;
 };
+
+export async function getNoteByIdDb(id: string): Promise<Note | null> {
+    const result = await pool.query<NoteRow>(`
+    SELECT id, title, content, tags, created_at, updated_at 
+    FROM notes
+    WHERE id = $1;
+    `, [id]);
+
+    return result.rows[0] ?? null;
+}
