@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createNote, getNotes } from "../services/note.service";
+import { createNote, getNotes, updateNote } from "../services/note.service";
 
 export const noteRouter = Router();
 
@@ -26,4 +26,19 @@ noteRouter.get("/", async (_req, res, next) => {
     } catch (error) {
         next(error);
     }
-})
+});
+
+noteRouter.put("/:id", async (req, res, next) => {
+    try {
+        const { title, content, tags} = req.body;
+    
+        const note = await updateNote(req.params.id, title, content, tags);
+        
+        res.status(200).json({
+            success: true,
+            data: { note }
+        });  
+    } catch (error) {
+        next(error);
+    }
+});
