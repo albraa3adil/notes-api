@@ -1,6 +1,15 @@
 import { Note } from "../types/note";
 import { AppError } from "../errors/appError.ts"
-import { createNoteDb, getNotesDb } from "../repositories/note.repository.ts";
+import { createNoteDb, getNotesDb, updateNoteDB } from "../repositories/note.repository.ts";
+import { validate as isValidUUID } from 'uuid';
+
+function validateId(id: unknown): string {
+    if (!isValidUUID(id)) {
+        throw new AppError(400, "Invalid id.");
+    }
+
+    return id as string;
+};
 
 function validateTitle(title: unknown): string {
     if (typeof title !== 'string' || !title.trim()) {
@@ -58,4 +67,19 @@ export async function createNote(title: unknown, content: unknown, tags: unknown
 
 export async function getNotes(): Promise<Note[]> {
     return await getNotesDb(); 
+};
+
+export async function updateNote(id: unknown, title: unknown, content: unknown, tags: unknown): Promise<Note> {
+    const validId = validateId(id);
+    const validTitle = validateTitle(title);
+    const validContent = validateContent(content);
+    const validTags = validateTags(tags);
+
+    const note = await updateNoteDB(validId, validTitle, validContent, validTags);
+
+    if (!note) {
+      throw new AppError(404, "Note not found.");
+    }
+
+    return note;
 }
