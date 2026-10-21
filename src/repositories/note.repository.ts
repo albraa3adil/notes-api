@@ -40,4 +40,14 @@ export async function getNoteByIdDb(id: string): Promise<Note | null> {
     `, [id]);
 
     return result.rows[0] ?? null;
-}
+};
+
+export async function deleteNoteDb(id: string): Promise<boolean> {
+    const result = await pool.query<NoteRow>(`
+    DELETE FROM notes 
+    WHERE id = $1
+    RETURNING id, title, content, tags, created_at, updated_at;
+    `, [id]);
+
+    return (result.rowCount ?? 0) > 0;
+};

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createNote, getNoteById, getNotes, updateNote } from "../services/note.service";
+import { createNote, deleteNote, getNoteById, getNotes, updateNote } from "../services/note.service";
 
 export const noteRouter = Router();
 
@@ -49,6 +49,18 @@ noteRouter.get("/:id", async (req, res, next) => {
         res.status(200).json({
             success: true,
             data: { note }
+        })
+    } catch (error) {
+        next(error);
+    }
+});
+
+noteRouter.delete("/:id", async (req, res, next) => {
+    try {
+        const note = await deleteNote(req.params.id);
+        res.status(200).json({
+            success: true,
+            message: "Note deleted successfully."
         })
     } catch (error) {
         next(error);
