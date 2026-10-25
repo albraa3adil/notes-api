@@ -7,12 +7,12 @@ export async function createNote(input: CreateNoteInput): Promise<Note> {
     return createNoteDb(input.title, input.content, input.tags);
 };
 
-export async function getNotes({ page, limit }: ListNotesQuery): Promise<Paginated<Note>> {
+export async function getNotes({ page, limit, ...filters }: ListNotesQuery): Promise<Paginated<Note>> {
     const offset = (page - 1) * limit;
 
     const [items, total] = await Promise.all([
-      getNotesDb(limit, offset),
-      countNotesDb()
+      getNotesDb(filters, limit, offset),
+      countNotesDb(filters)
     ]);
     
     return { items, total, page, limit}; 

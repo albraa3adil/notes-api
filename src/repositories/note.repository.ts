@@ -1,5 +1,25 @@
 import { pool } from "../lib/db";
-import { Note, NoteRow } from "../types/note";
+import { Note, NoteFilters, NoteRow } from "../types/note";
+import { escapeLikePattern } from "../utils/sql";
+
+function buildNoteFilters({search, tag}: NoteFilters): { whereClause: string, params: unknown[]} {
+    const conditions: string[] = [];
+    const params: unknown[] = [];
+
+    if (search) {
+        params.push(`%${escapeLikePattern(search)}%`);
+        conditions.push(`(title ILIKE $${params.length} OR content ILIKE $${params.length})`);
+    }
+
+    if (tag && tag.length > 0) {
+        params.push(tag);
+        conditions.push(`EXISTS (SELECT 1 FROM unnest(tags) AS t WHERE lower(t) = ANY($${params.length}::text[]))`)
+    }
+
+    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+
+    return { whereClause, params };
+};
 
 export async function createNoteDb(title: string, content: string, tags: string[]): Promise<Note> {
     const result = await pool.query<NoteRow>(`
@@ -11,22 +31,30 @@ export async function createNoteDb(title: string, content: string, tags: string[
     return result.rows[0];
 };
 
-export async function getNotesDb(limit: number, offset: number): Promise<Note[]> {
+export async function getNotesDb(filters: NoteFilters, limit: number, offset: number): Promise<Note[]> {
+    const { whereClause, params } = buildNoteFilters(filters);
+
+    params.push(limit, offset);
+    
     const result = await pool.query<NoteRow>(`
     SELECT id, title, content, tags, created_at, updated_at 
     FROM notes
+    ${whereClause} 
     ORDER BY created_at DESC, id DESC
-    LIMIT $1 OFFSET $2;
-    `, [limit, offset]);
+    LIMIT $${params.length - 1} OFFSET $${params.length };
+    `, params);
 
     return result.rows;
 };
 
-export async function countNotesDb() {
+export async function countNotesDb(filters: NoteFilters) {
+    const { whereClause, params } = buildNoteFilters(filters);
+
     const result = await pool.query<{ total: number }>(`
     SELECT COUNT(id)::int AS total
-    FROM notes;
-    `);
+    FROM notes
+    ${whereClause};
+    `, params);
 
     return result.rows[0].total
 }

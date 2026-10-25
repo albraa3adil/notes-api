@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+const MAX_TITLE = 200;
+const MAX_SEARCH_LENGTH = 200;
+const MAX_TAG_LENGTH = 100;
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 10;
 const MAX_LIMIT = 100;
@@ -9,7 +12,7 @@ const titleSchema = z
     .string({ error: "Title must be a string." })
     .trim()
     .min(1, "Title must not be empty.")
-    .max(200, "Title must be 200 or less.")
+    .max(MAX_TITLE, "Title must be 200 or less.")
 
 const contentSchema = z
     .string("Content must be a string.")
@@ -26,6 +29,34 @@ const tagsSchema = z
     .transform((tags) => (tags ?? []).filter(tag => tag.length > 0));
 
 const noteIdSchema = z.uuid({ error: "Invalid id." });
+
+const searchSchema = z
+    .string({ error: "Search must be a string." })
+    .trim()
+    .max(MAX_SEARCH_LENGTH, `Search must be  be ${MAX_SEARCH_LENGTH} or less.`)
+    .transform((search) => search.length === 0 ? undefined : search)
+    .optional()
+
+const tagFilterSchema = z.union(
+        [z.string(), z.array(z.string())],
+        { error: "Tag must be a string." }
+    )
+    .transform((tag) => [tag].flat())
+    .pipe(
+    z
+        .array(
+        z
+            .string()
+            .trim()
+            .toLowerCase()
+            .max(MAX_TAG_LENGTH, `Each tag must be ${MAX_TAG_LENGTH} characters or less.`)
+        )
+    )
+    .transform((tags) => {
+      const unique = [...new Set(tags.filter((tag) => tag.length > 0))];
+      return unique.length > 0 ? unique : undefined;
+    })
+    .optional();
 
 const limitSchema = z
     .coerce.number({ error: "Limit must be a number." })
@@ -51,6 +82,8 @@ export const updateNoteSchema = createNoteSchema;
 export const noteIdParamSchema = z.object({ id: noteIdSchema });
 
 export const listNotesQuerySchema = z.object({ 
+    search: searchSchema,
+    tag: tagFilterSchema,
     page: pageSchema,
     limit: limitSchema
 });
