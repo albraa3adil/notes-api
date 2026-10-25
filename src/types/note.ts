@@ -14,4 +14,9 @@ export type Paginated<T> = {
     total: number;
     page: number;
     limit: number;
-}
+};
+
+export type NoteFilters = {
+    search?: string;
+    tag?: string[];
+};
