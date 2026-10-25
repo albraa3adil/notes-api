@@ -11,15 +11,25 @@ export async function createNoteDb(title: string, content: string, tags: string[
     return result.rows[0];
 };
 
-export async function getNotesDb(): Promise<Note[]> {
+export async function getNotesDb(limit: number, offset: number): Promise<Note[]> {
     const result = await pool.query<NoteRow>(`
     SELECT id, title, content, tags, created_at, updated_at 
     FROM notes
-    ORDER BY created_at DESC;
-    `);
+    ORDER BY created_at DESC, id DESC
+    LIMIT $1 OFFSET $2;
+    `, [limit, offset]);
 
     return result.rows;
 };
+
+export async function countNotesDb() {
+    const result = await pool.query<{ total: number }>(`
+    SELECT COUNT(id)::int AS total
+    FROM notes;
+    `);
+
+    return result.rows[0].total
+}
 
 export async function updateNoteDB(id: string, title: string, content: string, tags: string[]): Promise<Note | null> {
     const result = await pool.query<NoteRow>(`

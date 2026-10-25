@@ -8,3 +8,10 @@ export type Note = {
 }
 
 export type NoteRow = Note;
+
+export type Paginated<T> = {
+    items: T[];
+    total: number;
+    page: number;
+    limit: number;
+}

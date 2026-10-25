@@ -20,6 +20,8 @@ export function validate(schema: ZodType) {
             req.body = data.body;
         }
 
+        res.locals.validated = result.data;
+
         next();
     }
 }
