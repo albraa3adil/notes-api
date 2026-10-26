@@ -27,6 +27,7 @@ export function errorHandler(err: Error, _req: Request, res: Response, _next: Ne
                 message: issue.message
             }))
         });
+        return;
     }
     
     if (err instanceof AppError) {
